@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="trip.planbbs">
+<select id="myplanList" parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM
+      (
+         SELECT @ROWNUM:=@ROWNUM+1 as rownum, a.p_idx,a.p_name,a.p_content,b.pl_idx,b.DAY,b.img,b.sunbun,c.idx,c.id 
+         FROM plan a, planInfo b, member c, (SELECT @ROWNUM:=0) R
+         WHERE a.idx=#{idx} AND b.p_idx=#{p_idx} AND a.p_idx=#{p_idx} AND c.idx=#{idx} AND b.DAY=#{day} ORDER BY b.sunbun ASC
+      ) a WHERE rownum<![CDATA[>=]]>((#{cp}-1)*1)+1 AND rownum<![CDATA[<=]]>#{cp}*1
+</select>
+<!-- day바꾸기-->
+<select id="dayChange" parameterType="int" resultType="int">
+	SELECT COUNT(DISTINCT DAY) FROM planInfo WHERE p_idx = #{p_idx}
+</select>
+<select id="getTotalCnt" parameterType="int" resultType="int">
+SELECT COUNT(*) FROM planInfo WHERE p_idx=#{p_idx} AND DAY=#{day}
+</select>
+<update id="planImgChange" parameterType="hashmap">
+	UPDATE planInfo SET img=#{img} WHERE p_idx=#{p_idx} AND pl_idx=#{pl_idx}
+</update>
+<select id="planModi1" parameterType="int" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM plan WHERE p_idx=#{p_idx}
+</select>
+<insert id="planbbsInsert"  parameterType="trip.planbbs.model.PlanBbsVO">
+INSERT INTO plan_bbs VALUES (get_seq('idx'),#{plan_title},#{plan_content},#{plan_writer},NOW(),#{p_idx});
+</insert>
+<select id="myplanListView"  parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM planInfo a, plan b, member c, place d
+WHERE b.p_idx=#{p_idx} AND c.idx=#{idx} AND b.idx=#{idx} AND a.p_idx=#{p_idx} AND a.DAY=#{day} AND d.pl_idx=a.pl_idx
+</select>
+<select id="myplanBbsListView"  parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * from(SELECT  @ROWNUM:=@ROWNUM+1 as rownum,b.img,b.DAY,b.sunbun,a.bbs_idx,a.plan_title,a.plan_content,a.p_idx FROM plan_bbs a, planInfo b,(SELECT @ROWNUM:=0) R
+WHERE a.plan_writer="13" AND b.sunbun=1 AND b.DAY=1)c WHERE rownum<![CDATA[>=]]>((#{cp}-1)*3)+1 AND rownum<![CDATA[<=]]>#{cp}*3
+</select>
+<select id="myplanBbsTotal" parameterType="hashmap" resultType="int">
+SELECT COUNT(*) FROM plan_bbs WHERE bbs_idx AND plan_bbs.plan_writer=#{plan_writer};
+</select>
+<select id="myPlanBbsContent" parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT a.*,b.img,b.day FROM plan_bbs a, planInfo b
+WHERE a.plan_writer=#{plan_writer} and b.DAY=1 and a.bbs_idx=#{bbs_idx} ORDER BY sunbun asc;
+</select>
+<select id="myplanbbsContent2" parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM plan_bbs a, planInfo b
+WHERE a.p_idx=#{p_idx} AND b.p_idx=#{p_idx} AND bbs_idx=#{bbs_idx} AND DAY=#{day};
+</select>
+
+<select id="goodselect" parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM good WHERE idx=#{idx} AND bbs_idx=#{bbs_idx};
+</select>
+<delete id="planbbsDelete" parameterType="int">
+DELETE FROM plan_bbs WHERE bbs_idx=#{bbs_idx};
+</delete>		
+<select id="planbbsIdCheck" parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM plan_bbs a, member b WHERE
+a.plan_writer=b.id AND bbs_idx=#{bbs_idx}
+</select>
+<update id="planbbsModi" parameterType="hashmap">
+UPDATE plan_bbs SET plan_content=#{plan_content},plan_writedate=NOW() WHERE bbs_idx=#{bbs_idx};
+</update>
+<select id="planbbsModiImg" parameterType="hashmap" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT * FROM (SELECT @ROWNUM:=@ROWNUM+1 as rownum, a.*,b.img,b.DAY,b.sunbun FROM plan_bbs a, planInfo b , (SELECT @ROWNUM:=0) R
+WHERE a.p_idx=b.p_idx AND a.bbs_idx=#{bbs_idx} AND b.DAY=#{day} ORDER BY sunbun ASC)c WHERE  rownum<![CDATA[>=]]>((#{cp}-1)*1)+1 AND rownum<![CDATA[<=]]>#{cp}*1
+</select>
+<select id="planbbsImgModiCount" parameterType="hashmap" resultType="int">
+SELECT COUNT(*) FROM plan_bbs , planInfo WHERE plan_bbs.bbs_idx=#{bbs_idx} AND planInfo.DAY=#{day} AND plan_bbs.p_idx=planInfo.p_idx
+</select>
+<select id="planbbsModidayCount" parameterType="hashmap" resultType="int">
+SELECT count(DISTINCT DAY) FROM planInfo a, plan_bbs b WHERE a.p_idx=b.p_idx AND b.bbs_idx=#{bbs_idx}
+</select>
+<select id="planBbsContent" parameterType="int" resultType="trip.planbbs.model.PlanBbsVO">
+select * from plan_bbs where bbs_idx=#{bbs_dix}
+</select>
+<select id="allPlanList" parameterType="int" resultType="trip.planbbs.model.PlanBbsVO">
+SELECT *from(SELECT @ROWNUM:=@ROWNUM+1 as rownum, a.bbs_idx,a.plan_writer,a.plan_title,a.p_idx,b.img,b.sunbun FROM plan_bbs a,planInfo b,(SELECT @ROWNUM:=0) R WHERE a.p_idx=b.p_idx AND b.sunbun=1 AND b.DAY=1)c WHERE rownum<![CDATA[>=]]>((#{cp}-1)*3)+1 AND rownum<![CDATA[<=]]>#{cp}*3;
+</select>
+<select id="allPlanCount" resultType="int">
+SELECT COUNT(bbs_idx) from plan_bbs;
+</select>
+
+
+<update id="planInfoImgUpdate" parameterType="map">
+UPDATE planInfo
+SET img = #{img}
+WHERE p_idx = #{p_idx} AND pl_idx = #{pl_idx} AND DAY = #{day}
+</update>
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="trip.sns">
+	<insert id="snsWrite" parameterType="trip.sns.model.SnsDTO"
+		useGeneratedKeys="true" keyProperty="bbs_idx" keyColumn="bbs_idx">
+		insert into
+		sns_bbs
+		values(#{bbs_idx},
+		#{sns_title},
+		#{sns_content},
+		#{sns_writer},
+		sysdate());
+
+		<selectKey keyProperty="bbs_idx" resultType="int"
+			order="BEFORE">
+			select
+			get_seq('bbs_idx') FROM DUAL
+		</selectKey>
+
+		<foreach collection="imgList" item="bbs_img">
+		INSERT INTO bbsImg VALUES(#{bbs_img}, #{bbs_idx});
+		</foreach>
+	</insert>
+
+	<insert id="snsGood" parameterType="trip.sns.model.GoodDTO">
+		insert into
+		good
+		values(get_seq('idx'),#{bbs_idx});
+	</insert>
+
+	<select id="snsGoodCount" parameterType="int">
+		select count(*) from
+		good;
+	</select>
+
+	<!--snslist -->
+	<select id="snsList" parameterType="Map"
+		resultType="trip.sns.model.SnsDTO">
+		SELECT *
+		FROM sns_bbs
+		ORDER BY bbs_idx DESC
+		LIMIT #{end}
+		OFFSET #{start};
+	</select>
+
+	<!--mySnslist -->
+	<select id="mySnsList" parameterType="Map"
+		resultType="trip.sns.model.SnsDTO">
+		SELECT *
+		FROM sns_bbs 
+		WHERE sns_writer = #{sns_writer}
+		ORDER BY bbs_idx DESC
+		LIMIT #{end}
+		OFFSET #{start};
+	</select>
+
+	<select id="snsTotalCount" resultType="int">
+		select count(*) from
+		sns_bbs;
+	</select>
+
+	<select id="snsSelectContent" parameterType="int"
+		resultType="trip.sns.model.SnsDTO">
+		select * from sns_bbs where bbs_idx=#{bbs_dix}
+	</select>
+
+	<select id="bbsAllImgList" parameterType="int"
+		resultType="bbsImg">
+		SELECT * FROM bbsImg
+	</select>
+
+	<delete id="snsDelete" parameterType="int">
+		DELETE FROM sns_bbs
+		WHERE
+		bbs_idx = #{bbs_idx}
+	</delete>
+	
+	<insert id="goodInsert" parameterType="hashmap">
+	INSERT INTO good VALUES(#{idx},#{bbs_idx});
+	</insert>
+	<delete id="goodDelete" parameterType="hashmap">
+	DELETE FROM good WHERE idx=#{idx} AND bbs_idx=#{bbs_idx};
+	</delete>
+	<select id="goodCount" parameterType="int" resultType="int">
+	SELECT COUNT(*) from good where bbs_idx=#{bbs_idx};
+	</select>
+	
+
+	<select id="goodCheck" parameterType="int" resultType="trip.sns.model.SnsVO">
+	SELECT bbs_idx from good where idx=#{idx};
+	</select>
+	<select id="goodlist" parameterType="int" resultType="trip.sns.model.GoodDTO">
+		select * from good where idx=#{idx}
+	</select>
+</mapper>

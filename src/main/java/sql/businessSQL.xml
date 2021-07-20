@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.business">
+	<select id="businessPlaceList" parameterType="int" resultType="placeVO">
+		SELECT place.*, pl_img
+		FROM place, placeImg
+		WHERE place.pl_idx = placeImg.pl_idx AND owner = #{idx}
+		ORDER BY pl_idx
+	</select>
+	<delete id="businessPlaceDelete" parameterType="int">
+		DELETE FROM place
+		WHERE pl_idx = #{pl_idx};
+		
+		DELETE FROM placeImg
+		WHERE pl_idx = #{pl_idx};
+		
+		DELETE FROM placeFavorite
+		WHERE pl_idx = #{pl_idx};
+		
+		DELETE FROM placeInfoFavorite
+		WHERE pl_idx = #{pl_idx};
+	</delete>
+	<insert id="businessPlaceInsert" parameterType="map">
+		<selectKey keyProperty="pl_idx" resultType="int" order="BEFORE">
+		SELECT get_seq('pl_idx') FROM DUAL
+		</selectKey>
+		
+		INSERT INTO place
+		VALUES(#{pl_idx}, #{pl_name}, #{pl_content}, #{pl_lat}, #{pl_lng}, 0, 0, #{owner});
+		
+		<foreach collection="imgList" item="pl_img">
+		INSERT INTO placeImg VALUES(#{pl_img}, #{pl_idx});
+		</foreach>
+		
+		<foreach collection="favoriteList" item="favorite">
+		INSERT INTO placeInfoFavorite VALUES(#{pl_idx}, #{favorite.v_idx}, #{favorite.count});
+		INSERT INTO placeFavorite VALUES(#{pl_idx}, #{favorite.v_idx}, 0);
+		</foreach>
+		
+		<foreach collection="cityList" item="city">
+		INSERT INTO cityTotal VALUES(#{pl_idx}, #{city.c_idx}, 0);
+		</foreach>
+		
+		INSERT INTO total VALUES(#{pl_idx}, 0, 0, 0, 0, 0, 0, 0);
+		
+	</insert>
+	<update id="businessPlaceUpdate">
+		UPDATE place
+		SET pl_name=#{pl_name}, pl_content=#{pl_content}, pl_lat=#{pl_lat}, pl_lng=#{pl_lng}
+		WHERE pl_idx=#{pl_idx};
+		
+		<foreach collection="imgList" item="pl_img">
+		INSERT INTO placeImg VALUES(#{pl_img}, #{pl_idx});
+		</foreach>
+			
+		<foreach collection="favoriteList" item="favorite">
+		UPDATE placeInfoFavorite SET count=#{favorite.count} WHERE pl_idx=#{pl_idx} AND v_idx=#{favorite.v_idx};
+		</foreach>
+	</update>
+	
+	
+	<delete id="placeAllImgDelete" parameterType="int">
+		DELETE FROM placeImg WHERE pl_idx = #{pl_idx}
+	</delete>
+</mapper>

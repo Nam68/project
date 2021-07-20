@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="trip.qna">
+  	<insert id="QnAInsert" parameterType="trip.qna.model.QnADTO">
+		insert into qna values(
+		get_seq('bbs_idx'),
+		#{q_title},
+		#{q_content},
+		#{q_writer},
+		now()
+		)
+	</insert>
+	
+	<select id="QnAList" parameterType="Map"  resultType="trip.qna.model.QnADTO">
+			 <![CDATA[
+			SELECT * FROM qna ORDER BY BBS_IDX DESC LIMIT #{start}, 10;
+			 ]]>
+		</select>
+		
+		<select id="QnATotalCnt" resultType="int">
+			select count(*) from qna 
+		</select>
+	
+		<select id="QnASelectContent" parameterType="int" resultType="trip.qna.model.QnADTO">
+			select * 
+			from qna
+			where bbs_idx=#{bbs_idx} 
+		</select>
+	
+		    <update id="QnAUpdate" parameterType="trip.qna.model.QnADTO">
+       		 update qna set
+           	       	q_title = #{q_title}, q_content = #{q_content}, q_writedate = now()
+      			  where
+          		 	 bbs_idx = #{bbs_idx}
+  		  	</update>
+  		  
+  		     <delete id="QnADelete" parameterType="int">
+       			 delete from qna
+       			 where bbs_idx=#{bbs_idx}
+   			 </delete>
+  		  
+  		  
+  		  
+		
+		
+	</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.total">
+
+	<select id="totalSelect" parameterType="int" resultType="total">
+		SELECT *
+		FROM total
+		WHERE pl_idx=#{pl_idx}
+	</select>
+	<update id="totalUpdate" parameterType="map">
+		UPDATE total
+		SET under20=#{under20}, in30=#{in30}, in40=#{in40}, in50=#{in50}, over60=#{over60}, male=#{male}, female=#{female}
+		WHERE pl_idx=#{pl_idx}
+	</update>
+	<update id="cityTotalUpdate" parameterType="map">
+		UPDATE cityTotal
+		SET count=count+1
+		WHERE pl_idx=#{pl_idx} AND c_idx=#{c_idx}
+	</update>
+	
+	<select id="getAllCity" resultType="city">
+		SELECT * FROM city
+	</select>
+	
+	<!-- 통계정보를 제일 위의 1개만 가져오기 -->
+	<select id="favoriteTotalRnumSelect" parameterType="int" resultType="favoriteTotalVO">
+		SELECT v_name, B.v_idx, ROUND(COUNT/S * 100, 1) AS value
+		FROM
+		(		
+		SELECT SUM(COUNT) AS S, pl_idx
+		FROM placeFavorite
+		WHERE pl_idx = #{pl_idx}
+		) A, placeFavorite B, favorite C
+		WHERE A.pl_idx = B.pl_idx AND B.v_idx = C.v_idx
+	</select>
+	<select id="cityTotalRnumSelect" parameterType="int" resultType="cityTotalVO">
+		SELECT city, B.c_idx, ROUND(COUNT/S * 100, 1) AS value
+		FROM
+		(		
+		SELECT SUM(COUNT) AS S, pl_idx
+		FROM cityTotal
+		WHERE pl_idx = #{pl_idx}
+		) A, cityTotal B, city C
+		WHERE A.pl_idx = B.pl_idx AND B.c_idx = C.c_idx
+	</select>	
+	<select id="totalRnumSelect" parameterType="int" resultType="totalVO">
+		SELECT T.pl_idx, ROUND(under20/A*100,1) AS under20, ROUND(in30/A*100, 1) AS in30, ROUND(in40/A*100, 1) AS in40, ROUND(in50/A*100, 1) AS in50, ROUND(over60/A*100, 1) AS over60, ROUND(male/G*100,1) AS male, ROUND(female/G*100,1) AS female
+		FROM 
+		(
+		SELECT under20+in30+in40+in50+over60 AS A, male+female AS G, pl_idx
+		FROM total
+		WHERE pl_idx = #{pl_idx}
+		) A, total T
+		WHERE T.pl_idx = A.pl_idx AND T.pl_idx = #{pl_idx}
+	</select>
+	
+	
+	
+	<select id="today" resultType="int">
+		SELECT count(*) FROM totalVisit WHERE DATE_FORMAT(connectdate, "%Y-%m-%d") = CURDATE()
+	</select>
+	<select id="totalday" resultType="int">
+		SELECT count(*) FROM totalVisit
+	</select>
+	<select id="ipcount" resultType="int" parameterType="String">
+		SELECT count(idx) FROM totalVisit WHERE DATE_FORMAT(connectdate, '%Y-%m-%d') = CURDATE() and ip=#{ip} 
+	</select>
+	<select id="ipselect" resultType="int" parameterType="String">
+		SELECT idx FROM totalVisit WHERE DATE_FORMAT(connectdate, '%Y-%m-%d') = CURDATE() and ip=#{ip}
+	</select>
+	<insert id="inserttotal" parameterType="String">
+		INSERT INTO totalVisit VALUES (get_seq('idx'),#{ip},NOW(),0);
+	</insert>
+	<update id="grouptotal" parameterType="Map">
+		UPDATE totalVisit set type=#{type} where idx=#{idx}
+	</update>
+	<select id="typeday" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM totalVisit WHERE DATE_FORMAT(connectdate, "%Y-%m-%d") = CURDATE() and TYPE=#{type}
+	</select>
+	<select id="alltimetype" parameterType="int" resultType="int">
+		SELECT count(*) FROM totalVisit WHERE TYPE=#{type}
+	</select>
+	
+	
+	
+	<select id="adspay" resultType="int">
+		SELECT ad_price FROM admin
+	</select>
+	<insert id="adscount" parameterType="Map">
+		INSERT INTO ads_pay VALUES(#{bbs_idx},NOW(),#{pay})
+	</insert>
+	<select id="bbstotal" resultType="int" parameterType="Map">
+		SELECT SUM(pay) FROM (SELECT * FROM ads_pay WHERE bbs_idx=#{bbs_idx}) a WHERE countdate<![CDATA[>]]>#{start} AND countdate<![CDATA[<]]>#{end}
+	</select>
+	<select id="adstotal" resultType="int" parameterType="Map">
+		SELECT IFNULL(SUM(pay),0) FROM ads_pay WHERE countdate<![CDATA[>]]>#{start} AND countdate<![CDATA[<]]>#{end}
+	</select>
+</mapper>

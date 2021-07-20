@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="trip.review">
+	
+	<insert id="reviewWrite" parameterType="map">	
+		<selectKey keyProperty="r_idx" resultType="int" order="BEFORE">
+		SELECT get_seq('r_idx') FROM DUAL
+		</selectKey>
+		
+		INSERT INTO pl_star VALUES(#{pl_idx}, #{idx}, #{star}, #{r_idx});
+		INSERT INTO review VALUES(#{r_idx}, #{pl_idx}, #{idx}, #{review}, 0);
+	</insert>
+	
+	<select id="reviewList" parameterType="int" resultType="review">
+		SELECT R.r_idx, R.pl_idx, R.idx, star, review
+		FROM review R, pl_star
+		WHERE R.r_idx = pl_star.r_idx AND R.pl_idx = #{pl_idx}
+	</select>
+	
+	<select id="reviewManagerList" resultType="review">
+		SELECT R.r_idx, R.pl_idx, R.idx, star, review
+		FROM review R, pl_star
+		WHERE R.r_idx = pl_star.r_idx AND confirm = 1
+	</select>
+	
+	<update id="reviewDeleteReq" parameterType="int">
+		UPDATE review
+		SET confirm = 1
+		WHERE r_idx = #{r_idx}
+	</update>
+	<update id="reviewDeleteReqCancel" parameterType="int">
+		UPDATE review
+		SET confirm = 0
+		WHERE r_idx = #{r_idx}
+	</update>
+	
+	<delete id="reviewDelete" parameterType="int">
+		DELETE FROM review
+		WHERE r_idx = #{r_idx}
+	</delete>
+
+</mapper>

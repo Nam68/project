@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	
+	
+	<!-- DAOs -->
+	<bean id="memberDAO" class="trip.member.model.MemberDAOImple"></bean>
+	<bean id="questionDAO" class="trip.question.model.QuestionDAOImple"></bean>
+	<bean id="placeDAO" class="trip.place.model.PlaceDAOImple"></bean>
+	<bean id="favoriteDAO" class="trip.favorite.model.FavoriteDAOImple"></bean>
+	<bean id="totalDAO" class="trip.total.model.TotalDAOImple"></bean>
+	<bean id="businessDAO" class="trip.business.model.BusinessDAOImple"></bean>
+	<bean id="adDAO" class="trip.ad.model.AdDAOImple"></bean>
+	<bean id="snsDAO" class="trip.sns.model.SnsDAOImple"></bean>
+	<bean id="commentDAO" class="trip.comment.model.CommentDAOImple"></bean>
+	<bean id="planBbsDAO" class="trip.planbbs.model.PlanBbsDAOImple"></bean>
+	<bean id="reviewDAO" class="trip.review.model.ReviewDAOImple"></bean>
+	<bean id="totalVistitDAO" class="trip.total.model.TotalVistitDAOImple"></bean>
+	<bean id="noticeDAO" class="trip.notice.model.NoticeDAOImple"></bean>
+	<bean id="qnADAO" class="trip.qna.model.QnADAOImple"></bean>
+	<bean id="userDAO" class="trip.member.model.UserDAOImple"></bean>
+	
+	<!-- Services -->
+	<bean id="memberService" class="trip.member.service.MemberServiceImple"></bean>
+	<bean id="questionService" class="trip.question.service.QuestionServiceImple"></bean>
+	<bean id="placeService" class="trip.place.service.PlaceServiceImple"></bean>
+	<bean id="favoriteService" class="trip.favorite.service.FavoriteServiceImple"></bean>
+	<bean id="totalService" class="trip.total.service.TotalServiceImple"></bean>
+	<bean id="businessService" class="trip.business.service.BusinessServiceImple"></bean>
+	<bean id="adService" class="trip.ad.service.AdServiceImple"></bean>
+	<bean id="imgService" class="trip.img.service.ImgServiceImple"></bean>
+	<bean id="snsService" class="trip.sns.service.SnsServiceImple"></bean>
+	<bean id="commentService" class="trip.comment.service.CommentServiceImple"></bean>
+	<bean id="planBbsService" class="trip.planbbs.service.PlanBbsServiceImple"></bean>
+	<bean id="reviewService" class="trip.review.service.ReviewServiceImple"></bean>
+	<bean id="noticeService" class="trip.notice.service.NoticeServiceImple"></bean>
+	<bean id="qnAService" class="trip.qna.service.QnAServiceImple"></bean>
+	<bean id="userService" class="trip.member.service.UserServiceImple"></bean>
+	<bean id="totalVistitService" class="trip.total.service.TotalVistitServiceImple"></bean>
+	
+	
+	
+	<!-- configs -->
+	<context:component-scan base-package="trip"></context:component-scan>
+	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"></bean>
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="10485760"></property> <!-- 최고용량 10MB -->
+	</bean>
+	
+	<!-- mybatis -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://210.114.6.195/lne8372?allowMultiQueries=true"></property>
+		<property name="username" value="lne8372"></property>
+		<property name="password" value="travel567@"></property>
+	</bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+	</bean>
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean"></constructor-arg>
+	</bean>
+	
+	<!-- views & apps -->
+	<bean id="tripDown" class="trip.view.DownloadView"></bean>
+	<bean id="tripUpload" class="trip.view.FileUpload"></bean>
+	<!-- json -->
+	<bean id="tripJson" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+		<property name="contentType" value="application/json;charset=UTF-8"></property>
+	</bean>
+	
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="contentType" value="text/html; charset=UTF-8" />
+		<property name="prefix" value="/WEB-INF/views/"></property>
+		<property name="suffix" value=".jsp"></property>
+		<property name="order" value="1"></property>
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
+	</bean>
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="0"></property>
+	</bean>
+</beans>

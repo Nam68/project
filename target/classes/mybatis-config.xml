@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <typeAliases>
+  	<typeAlias type="trip.member.model.MemberDTO" alias="member"/>
+  	<typeAlias type="trip.member.model.AdminDTO" alias="admin"/>
+  	<typeAlias type="trip.member.model.UserDTO" alias="user"/>
+  	<typeAlias type="trip.member.model.BusinessDTO" alias="business"/>
+  	
+  	<typeAlias type="trip.question.model.QuestionDTO" alias="question"/>
+  	
+  	<typeAlias type="trip.place.model.PlaceDTO" alias="place"/>
+  	<typeAlias type="trip.place.model.PlaceVO" alias="placeVO"/>
+  	
+  	<typeAlias type="trip.favorite.model.FavoriteDTO" alias="favorite"/>
+  	<typeAlias type="trip.favorite.model.UserFavoriteDTO" alias="userFavorite"/>
+  	<typeAlias type="trip.favorite.model.PlaceFavoriteDTO" alias="PlaceFavorite"/>
+  	<typeAlias type="trip.favorite.model.PlaceInfoFavoriteDTO" alias="PlaceInfoFavorite"/>
+  	<typeAlias type="trip.favorite.model.PlaceInfoFavoriteVO" alias="placeInfoFavoriteVO"/>
+  	
+  	<typeAlias type="trip.total.model.TotalDTO" alias="total"/>
+  	<typeAlias type="trip.total.model.TotalVO" alias="totalVO"/>
+  	<typeAlias type="trip.total.model.CityTotalDTO" alias="cityTotal"/>
+  	<typeAlias type="trip.total.model.CityDTO" alias="city"/>
+  	<typeAlias type="trip.total.model.FavoriteTotalVO" alias="favoriteTotalVO"/>
+  	<typeAlias type="trip.total.model.CityTotalVO" alias="cityTotalVO"/>
+  	
+  	<typeAlias type="trip.ad.model.AdVO" alias="adVO"/>
+  	<typeAlias type="trip.ad.model.AdDTO" alias="ad"/>
+  	<typeAlias type="trip.img.model.BbsImgDTO" alias="bbsImg"/>
+  	
+  	<typeAlias type="trip.map.model.PlanVO" alias="planVO"/>
+  	<typeAlias type="trip.map.model.PlanDTO" alias="plan"/>
+  	<typeAlias type="trip.place.model.PlaceCartVO" alias="placeCart"/>
+  	
+  	<typeAlias type="trip.review.model.ReviewDTO" alias="review"/>
+  	
+  	<typeAlias type="trip.qna.model.QnADTO" alias="qna"/>
+  	<typeAlias type="trip.total.model.TotalVistitDTO" alias="visit"/>
+  	<typeAlias type="trip.comment.model.CommentVO" alias="comment"/>
+  	<typeAlias type="trip.notice.model.NoticeDTO" alias="notice"/>
+  </typeAliases>
+  <mappers>
+    <mapper resource="sql/memberSQL.xml"/>
+    <mapper resource="sql/questionSQL.xml"/>
+    <mapper resource="sql/placeSQL.xml"/>
+    <mapper resource="sql/favoriteSQL.xml"/>
+    <mapper resource="sql/totalSQL.xml"/>
+    <mapper resource="sql/businessSQL.xml"/>
+    <mapper resource="sql/adSQL.xml"/>
+    <mapper resource="sql/commentSQL.xml"/>
+    <mapper resource="sql/snsSQL.xml"/>
+    <mapper resource="sql/planBbsSQL.xml"/>
+    <mapper resource="sql/mapSQL.xml"/>
+    <mapper resource="sql/reviewSQL.xml"/>
+	<mapper resource="sql/qnaSQL.xml"/>
+	<mapper resource="sql/statsSQL.xml"/>
+	<mapper resource="sql/noticeSQL.xml"/>
+	<mapper resource="sql/userSQL.xml"/>
+  </mappers>
+</configuration>

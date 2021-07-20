@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="notice">
+ 
+ 	<insert id="noticeInsert" parameterType="trip.notice.model.NoticeDTO">
+       insert into notice values(get_seq('n_idx'),#{n_title} , #{n_content}, #{n_writer}, now(), 1);
+    </insert>
+    
+    <select id="noticeAllList" parameterType="Map"  resultType="trip.notice.model.NoticeDTO">
+			 <![CDATA[
+			SELECT * FROM notice ORDER BY n_idx DESC, n_readnum DESC LIMIT #{start}, 10
+			]]> 
+		</select>
+
+		<select id="noticeTotalCnt" resultType="int">
+			select count(*) from notice 
+		</select>
+	
+		<select id="noticeContent" parameterType="int" resultType="trip.notice.model.NoticeDTO">
+			select * 
+			from notice
+			where n_idx=#{n_idx} 
+		</select>
+		
+		<update id="noticeReadnum" parameterType="int">
+ 	      UPDATE notice SET n_readnum = n_readnum + 1 WHERE n_idx = #{n_idx}
+		</update>
+		
+		<select id="noticePop" resultType="trip.notice.model.NoticeDTO">
+			SELECT * FROM notice 
+					ORDER BY n_writedate LIMIT 1
+		</select>
+		
+	   <update id="noticeUpdate" parameterType="trip.notice.model.NoticeDTO">
+	       	 update notice set
+	        	n_title = #{n_title}, n_content = #{n_content},n_writedate = now()
+	      	 where
+	          n_idx = #{n_idx}
+  			</update>
+  			
+  			
+  		     <delete id="noticeDelete" parameterType="int">
+       			 delete from notice
+       			 where n_idx=#{n_idx}
+   			 </delete>
+		
+		
+</mapper>

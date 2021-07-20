@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+#login_modal {
+	width: 30vw;
+	height: 40vh;
+	top: 30vh;
+	left: 35vw;
+}
+
+ 
+        .loginBody>div {text-align: center; margin-bottom: 5%;}
+        .loginTitle {font-size: 3vw;}
+        .loginBody>div>div {display: inline-block; text-align: center; margin-left: 1%; margin-right: 1%;}

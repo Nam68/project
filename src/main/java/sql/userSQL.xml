@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="trip.member">
+
+<select id="customerUserAllList" parameterType="Map"  resultType="trip.member.model.MemberDTO">
+			 <![CDATA[
+			SELECT * FROM member WHERE groupidx = 2 ORDER BY IDX DESC LIMIT #{start}, 10;
+			 ]]>
+		</select>
+
+<select id="userTotalCnt" resultType="int">
+			select count(*) from member where groupidx = 2;
+		</select>
+
+<select id="customerBusinessAllList" parameterType="Map"  resultType="trip.member.model.MemberDTO">
+			 <![CDATA[
+			SELECT @ROWNUM:=@ROWNUM+1 AS RNUM
+     , TOTAL.*
+  FROM (SELECT * 
+         
+          FROM member 
+             , (SELECT @ROWNUM := 0) R
+      	WHERE groupidx=3
+         ORDER BY idx asc
+       ) TOTAL
+	 LIMIT #{start},10;
+ 
+			 ]]>
+		</select>
+
+		<select id="businessTotalCnt" resultType="int">
+			select count(*) from member where groupidx = 3;
+		</select>
+		
+		<delete id="customerUserDelete" parameterType="String">
+				DELETE member, user
+		  FROM member
+			  INNER JOIN user ON  member.idx = user.idx
+		  WHERE member.idx = #{member.idx}
+				
+		</delete>
+		    
+    <update id="adminPwd" parameterType="trip.member.model.MemberDTO">
+        UPDATE member SET pwd = #{pwd} WHERE id = #{id}
+    </update> 
+
+
+</mapper>

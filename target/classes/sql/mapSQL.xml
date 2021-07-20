@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.map">
+	<insert id="planAdd" parameterType="map">
+		<selectKey keyProperty="p_idx" resultType="int" order="BEFORE">
+		SELECT get_seq('p_idx') FROM DUAL
+		</selectKey>
+	 insert into plan values(
+	 #{p_idx},
+	 #{dto.p_name},
+	 #{dto.p_content},
+	 #{dto.idx});
+	 
+	 <foreach collection="infoList" item="info">
+	 INSERT INTO planInfo VALUES(#{p_idx}, #{info.pl_idx}, #{info.day}, #{info.img}, #{info.sunbun});
+	 
+	 </foreach>
+	</insert>
+	
+	<select id="planAllList" parameterType="int" resultType="planVO">
+	  SELECT *
+      FROM plan, planInfo
+      WHERE plan.p_idx = planInfo.p_idx AND idx = #{idx}
+      ORDER BY plan.p_idx DESC, planInfo.day ASC, planInfo.sunbun ASC
+	</select>
+	
+	<select id="placeAllList" parameterType="Map" resultType="placeCart">
+	SELECT * FROM placeImg plg INNER JOIN place pl ON pl.pl_idx=plg.pl_idx
+	</select>
+	
+	<select id="selectOneplace" parameterType="map" resultType="placeCart">
+	SELECT
+			 PL.pl_idx 
+	FROM 
+			place PL INNER JOIN placeImg PIG 
+	ON 
+			PL.PL_IDX=PIG.PL_IDX 
+	WHERE 
+			PL.pl_idx=#{pl_idx}
+	</select>
+	
+	<delete id="planDelete" parameterType="int">
+	DELETE FROM plan_bbs WHERE p_idx = #{p_idx};
+	DELETE FROM planInfo WHERE p_idx = #{p_idx};
+	DELETE FROM plan WHERE p_idx=#{p_idx};
+	</delete>
+</mapper>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+
+

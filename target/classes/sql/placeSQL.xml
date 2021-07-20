@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.place">
+	<select id="placePlainList" resultType="place">
+		SELECT * FROM place
+	</select>
+	<select id="placeList" parameterType="map" resultType="placeVO">
+		SELECT place.*, a.COUNT + b.COUNT AS result, pl_img
+		FROM place, placeImg,
+			(SELECT place.*, a.count
+			FROM place, placeInfoFavorite a
+			WHERE place.pl_idx = a.pl_idx AND a.v_idx = #{favorite1}
+			ORDER BY place.pl_idx) a,
+			(SELECT place.*, a.count
+			FROM place, placeInfoFavorite a
+			WHERE place.pl_idx = a.pl_idx AND a.v_idx = #{favorite2}
+			ORDER BY place.pl_idx) b
+		WHERE place.pl_idx = a.pl_idx AND place.pl_idx = b.pl_idx AND place.pl_idx = placeImg.pl_idx
+		ORDER BY result DESC, rand()
+	</select>
+	<select id="placeWithImg" parameterType="map" resultType="placeVO">
+		SELECT place.pl_idx, pl_name, pl_content, pl_lat, pl_lng, 
+				pl_like.pl_like, pl_star.pl_star, pl_img, review, user_like
+		FROM place, placeImg img
+		LEFT JOIN 
+			(
+				SELECT pl_idx, review FROM 
+				(
+					SELECT @ROWNUM:=@ROWNUM+1 AS rnum, place.pl_idx, review
+					FROM place, review, (SELECT @ROWNUM:=0) R
+					WHERE place.pl_idx = review.pl_idx AND review.pl_idx = #{pl_idx}
+					ORDER BY review.r_idx DESC
+				) R
+				WHERE rnum = 1
+			) AS review
+		ON img.pl_idx = review.pl_idx
+		LEFT JOIN
+			(
+				SELECT COUNT(*) AS pl_like, pl_idx FROM pl_like WHERE pl_idx = #{pl_idx}
+			) AS pl_like
+		ON img.pl_idx = pl_like.pl_idx 
+		LEFT JOIN
+			(
+				SELECT AVG(star) AS pl_star, pl_idx FROM pl_star WHERE pl_idx = #{pl_idx}
+			) AS pl_star
+		ON img.pl_idx = pl_star.pl_idx
+		LEFT JOIN
+			(
+				SELECT COUNT(*) AS user_like, pl_idx FROM pl_like WHERE pl_idx = #{pl_idx} AND idx = #{idx}
+			) AS user_like
+		ON img.pl_idx = user_like.pl_idx
+		WHERE place.pl_idx = img.pl_idx AND place.pl_idx = #{pl_idx}
+	</select>
+	<insert id="likeAdd" parameterType="map">
+		INSERT INTO pl_like
+		VALUES(#{pl_idx}, #{idx})
+	</insert>
+	<delete id="likeDelete" parameterType="map">
+		DELETE FROM pl_like
+		WHERE pl_idx = #{pl_idx} AND idx = #{idx}
+	</delete>
+	<select id="likeSelect" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM pl_like
+		WHERE pl_idx = #{pl_idx}
+	</select>
+	<select id="placeFastSeach" parameterType="string" resultType="place">
+		SELECT pl_idx, pl_name
+		FROM place
+		WHERE pl_name LIKE CONCAT(#{searchWord}, '%')	
+	</select>
+	<select id="placeSeachText" parameterType="string" resultType="placeVO">
+		SELECT place.pl_idx, pl_name, pl_content, pl_lat, pl_lng, pl_like, pl_star, pl_img
+		FROM place, placeImg img
+		WHERE place.pl_idx = img.pl_idx AND place.pl_name LIKE CONCAT(#{searchWord}, '%')
+	</select>
+	<select id="placeSeachIdx" parameterType="int" resultType="placeVO">
+		SELECT place.pl_idx, pl_name, pl_content, pl_lat, pl_lng, pl_like, pl_star, pl_img
+		FROM place, placeImg img
+		WHERE place.pl_idx = img.pl_idx AND place.pl_idx = #{pl_idx}
+	</select>
+	
+	
+	<select id="getPlaceWithIdx" parameterType="int" resultType="place">
+		SELECT * FROM place WHERE owner = #{idx}
+	</select>
+</mapper>

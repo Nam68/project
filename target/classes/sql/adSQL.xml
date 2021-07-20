@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.ad">
+	<select id="adList" parameterType="int" resultType="adVO">
+		SELECT A.*, B.bbs_img
+		FROM
+			(
+			SELECT bbs_idx, a_idx, a_title, a_content, m.id AS a_writer, a_limit, a_href, a_count, a_startdate, a_enddate, 
+				a.ad_price AS cpc, p.rate,
+				case
+					when a_permit = 0 then 'NO'
+					when a_permit = 1 then 'YES'
+					when a_permit = -1 then 'DELETE'
+				END AS a_permit
+			FROM ads ad, member m, admin a, 
+				(
+				SELECT 100-(c-(a*b))/c*100 AS rate, d FROM 
+					(
+					SELECT ad.a_count a, a.ad_price b, ad.a_limit c, ad.a_idx d FROM ads ad, admin a
+					) A
+				) p
+			WHERE ad.a_writer = m.idx AND ad.a_idx = p.d AND ad.a_writer = #{idx}
+			) A
+		LEFT JOIN  bbsImg B
+		ON A.bbs_idx = B.bbs_idx
+	</select>
+	<select id="adSelect" parameterType="int" resultType="ad">
+		SELECT * FROM ads WHERE a_idx = #{a_idx}
+	</select>
+	<select id="adImgList" parameterType="int" resultType="bbsImg">
+		SELECT * FROM bbsImg WHERE bbs_idx = #{bbs_idx}
+	</select>
+	<delete id="adAllImgDelete" parameterType="int">
+		DELETE FROM bbsImg WHERE bbs_idx = #{bbs_idx}
+	</delete>
+	
+	
+	<select id="adListForSns" resultType="ad">
+		<![CDATA[
+			SELECT * FROM
+			(SELECT A.*, @ROWNUM:=@ROWNUM+1 AS rnum
+			FROM 
+			(SELECT DISTINCT A.bbs_idx, A.a_idx, A.a_title, A.a_content, M.id AS a_writer, A.a_limit, A.a_href, A.a_count, A.a_permit, A.a_startdate, A.a_enddate
+			FROM ads A, member M, 
+				(
+					SELECT a_count * ad_price AS T
+					FROM ads, admin
+				) T
+			WHERE a_enddate >= NOW() AND A.a_limit > T.T AND A.a_writer = M.idx AND a_permit = 1
+			ORDER BY RAND()
+			) A, (SELECT @ROWNUM:=0) R
+			) A WHERE rnum = 1
+		]]>
+	</select>
+	<update id="adCountUpdate" parameterType="int">
+		UPDATE ads SET a_count = a_count+1 WHERE bbs_idx = #{bbs_idx}
+	</update>
+	
+	
+ 	<insert id="adInsert" parameterType="map">
+		<selectKey keyColumn="a_idx,bbs_idx" keyProperty="a_idx,bbs_idx" resultType="map" order="BEFORE">
+		SELECT get_seq('a_idx') AS a_idx, get_seq('bbs_idx') AS bbs_idx FROM DUAL
+		</selectKey>
+		
+		INSERT INTO ads
+		VALUES(#{bbs_idx}, #{a_idx}, #{a_title}, #{a_content}, #{a_wirter}, #{a_limit}, #{a_href}, 0, 0, #{a_startdate}, #{a_enddate});
+		
+		<foreach collection="imgList" item="bbs_img">
+		INSERT INTO bbsImg VALUES(#{bbs_img}, #{bbs_idx});
+		</foreach>
+	</insert>
+	<update id="adUpdate" parameterType="map">
+		UPDATE ads
+		SET a_title = #{a_title}, a_content = #{a_content}, a_limit = #{a_limit}, a_href = #{a_href}, a_permit = 0, a_startdate = #{a_startdate}, a_enddate = #{a_enddate}
+		WHERE bbs_idx = #{bbs_idx};
+		
+		<foreach collection="imgList" item="bbs_img">
+		INSERT INTO bbsImg VALUES(#{bbs_img}, #{bbs_idx});
+		</foreach>
+	</update>
+	<delete id="adDelete" parameterType="int">
+		DELETE FROM ads WHERE a_idx = #{a_idx}
+	</delete>
+	
+	<!--추가-->
+	<select id="adManagerList" resultType="adVO">
+	SELECT * FROM(SELECT @ROWNUM:=@ROWNUM+1 as rownum,a.* FROM ads a,  (SELECT @ROWNUM:=0) R order by bbs_idx DESC)b WHERE 
+	rownum<![CDATA[>=]]>((#{cp}-1)*5)+1 AND rownum<![CDATA[<=]]>#{cp}*5
+	</select>
+	<select id="adCount" resultType="int">
+	SELECT COUNT(*) FROM ads
+	</select>
+	<update id="permitUpdate" parameterType="hashmap">
+	UPDATE ads SET a_permit=1 WHERE a_idx=#{a_idx}
+	</update>
+	<delete id="permitDelete" parameterType="hashmap">
+	UPDATE ads SET a_permit=0 WHERE a_idx=#{a_idx}
+	</delete>
+</mapper>

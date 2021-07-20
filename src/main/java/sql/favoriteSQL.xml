@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.favorite">
+	<select id="favoriteList" resultType="favorite">
+		select * from favorite
+	</select>
+	
+	<!-- 각각의 엔티티의 favorite 관련 테이블을 가져오는 쿼리 -->
+	<select id="userFavoriteList" parameterType="int" resultType="userFavorite">
+		select * from userFavorite where idx=#{idx}
+	</select>
+	<select id="placeFavoriteList" parameterType="int" resultType="placeFavorite">
+		select * from placeFavorite where pl_idx=#{pl_idx}
+	</select>
+	<select id="placeInfoFavoriteList" parameterType="int" resultType="placeInfoFavorite">
+		select * from placeInfoFavorite where pl_idx=#{pl_idx}
+	</select>
+	
+	<!-- place 하나의 placeInfoFavorite을 가져오되, 이름까지 같이 가져오는 쿼리 -->
+	<select id="placeInfoFavoriteSelect" parameterType="int" resultType="placeInfoFavoriteVO">
+		SELECT p.*, f.v_name
+		FROM placeInfoFavorite p, favorite f
+		WHERE p.v_idx = f.v_idx AND p.pl_idx = #{pl_idx}
+	</select>
+	
+	
+	<!-- 페이지를 벗어날 때 userFavorite을 올려주는 쿼리 -->
+	<update id="userFavoriteUpdate" parameterType="map">
+		update userFavorite
+		set count=#{count}
+		where idx=#{idx} and v_idx=#{v_idx}
+	</update>
+	<!-- 클릭 시 장소통계를 올려주는 쿼리 -->
+	<update id="placeFavoriteUpdate" parameterType="hashmap">
+		update placeFavorite
+		set count=#{count}
+		where pl_idx=#{pl_idx} and v_idx=#{v_idx}
+	</update>
+	
+	
+	
+	<!-- placeFavorite에 비어있는 favorite 컬럼을 강제로 입력하는 쿼리 -->
+	<insert id="placeFavoriteInsert">
+		insert into placeFavorite values(#{pl_idx}, #{v_idx}, #{count})
+	</insert>	
+	<!-- userFavorite에 비어있는 favorite 컬럼을 강제로 입력하는 쿼리 -->	
+	<insert id="userFavoriteListInsert" parameterType="hashmap">
+		<foreach collection="f_list" item="dto">
+		INSERT INTO userFavorite VALUES(#{idx}, #{dto.v_idx}, 0);
+		</foreach>
+	</insert>
+	
+	
+	
+	<insert id="adminFavoriteAdd">
+		<selectKey keyProperty="v_idx" resultType="int" order="BEFORE">
+		SELECT get_seq('v_idx') FROM DUAL
+		</selectKey>
+		
+		INSERT INTO favorite VALUES(#{v_idx}, #{v_name});
+		
+		<foreach collection="placeList" item="place">
+			INSERT INTO placeFavorite VALUES(#{place.pl_idx}, #{v_idx}, 0);
+			INSERT INTO placeInfoFavorite VALUES(#{place.pl_idx}, #{v_idx}, 0);
+		</foreach>
+		<foreach collection="memberList" item="member">
+			INSERT INTO userFavorite VALUES(#{member.idx}, #{v_idx}, 0);
+		</foreach>
+	</insert>
+	<delete id="adminFavoriteDelete">
+		DELETE FROM placeFavorite WHERE v_idx = #{v_idx};
+		DELETE FROM placeInfoFavorite WHERE v_idx = #{v_idx};
+		DELETE FROM userFavorite WHERE v_idx = #{v_idx};
+		DELETE FROM favorite WHERE v_idx = #{v_idx};
+	</delete>
+</mapper>

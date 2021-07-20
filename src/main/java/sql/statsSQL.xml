@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="trip.stats">
+	<select id="userStats" resultType="trip.member.model.UserDTO">
+	 <![CDATA[
+SELECT CC.GENDER, IF(GENDER = 1, '남자', '여자') AS gen, CC.A AS 'over_ten',  CC.B AS 'over_twenty',  CC.C AS 'over_thirty',  CC.D AS 'over_forty',  CC.E AS 'over_fifty',  CC.F AS 'over_sixty'
+, CONCAT(IFNULL(FLOOR(CC.A / CC.TOTAL * 100), 0), '%') AS 'a1'
+, CONCAT(IFNULL(FLOOR(CC.B / CC.TOTAL * 100), 0), '%') AS 'b1'
+, CONCAT(IFNULL(FLOOR(CC.C / CC.TOTAL * 100), 0), '%') AS 'c1'
+, CONCAT(IFNULL(FLOOR(CC.D / CC.TOTAL * 100), 0), '%') AS 'd1'
+, CONCAT(IFNULL(FLOOR(CC.E / CC.TOTAL * 100), 0), '%') AS 'e1'
+, CONCAT(IFNULL(FLOOR(CC.F / CC.TOTAL * 100), 0), '%') AS 'f1'
+, CC.TOTAL
+  FROM 
+  (
+SELECT BB.GENDER, BB.A,  BB.B,  BB.C,  BB.D,  BB.E,  BB.F, SUM(BB.A + BB.B + BB.C + BB.D + BB.E + BB.F) AS TOTAL
+FROM 
+(
+SELECT AA.GENDER
+, SUM(IF(AGE_FORMAT >= 10 AND AGE_FORMAT < 20 , AA.CNT , 0)) AS A
+, SUM(IF(AGE_FORMAT >= 20 AND AGE_FORMAT < 30 , AA.CNT , 0)) AS B
+, SUM(IF(AGE_FORMAT >= 30 AND AGE_FORMAT < 40 , AA.CNT , 0)) AS C
+, SUM(IF(AGE_FORMAT >= 40 AND AGE_FORMAT < 50 , AA.CNT , 0)) AS D
+, SUM(IF(AGE_FORMAT >= 50 AND AGE_FORMAT < 60 , AA.CNT , 0)) AS E
+, SUM(IF(AGE_FORMAT >= 60 AND AGE_FORMAT < 70 , AA.CNT , 0)) AS F
+FROM (
+SELECT GENDER, AGE, DATE_FORMAT(NOW(), '%Y') - SUBSTR(AGE,1,4) AS AGE_FORMAT, COUNT(0) AS CNT
+FROM user A
+GROUP BY GENDER, AGE
+) AA
+GROUP BY AA.GENDER
+) BB
+GROUP BY BB.GENDER
+) CC   
+	]]>
+	</select>
+  
+
+
+ </mapper>
+ 

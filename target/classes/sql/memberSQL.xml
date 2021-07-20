@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="trip.member">
+	<select id="memberLogin" parameterType="hashmap" resultType="member">
+		select * from member
+		where id=#{id} and pwd=#{pwd}
+	</select>
+	<select id="adminLogin" resultType="admin">
+		select * from admin
+	</select>
+	<select id="userLogin" parameterType="int" resultType="user">
+		select * from user
+		where idx=#{idx}
+	</select>
+	<select id="businessLogin" parameterType="int" resultType="business">
+		select * from business
+		where idx=#{idx}
+	</select>
+	
+	<select id="memberList" resultType="member">
+		SELECT * FROM member
+	</select>
+	
+	
+	<update id="joinday" parameterType="Map">
+		INSERT INTO member_day VALUES (#{idx},NOW(),#{type})
+	</update>
+	<select id="todayjoin" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM member_day WHERE TYPE=#{type} AND DATE_FORMAT(joindate, "%Y-%m-%d") = CURDATE();
+	</select>
+	<select id="alldaytype" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM member_day WHERE TYPE=#{type}
+	</select>
+	
+	<select id="idjoin" parameterType="String" resultType="trip.member.model.MemberDTO">
+		SELECT * FROM member WHERE id=#{id}
+	</select>
+	
+	
+	
+	
+		<insert id="memberinsert" parameterType="trip.member.model.MemberDTO">
+		insert into member values(get_seq('idx'),#{id},#{pwd},#{name},#{question},#{answer},#{groupidx})
+	</insert>
+	<select id="memberidx" resultType="int" parameterType="String">
+		SELECT idx FROM member where id=#{id}
+	</select>
+	
+	<insert id="userinsert" parameterType="trip.member.model.UserVO">
+      insert into user values(
+      #{idx},
+      #{age},
+      #{tel},
+      #{gender},
+      #{c_idx}
+      )
+   </insert>
+	<insert id="bisinsert" parameterType="trip.member.model.BusinessDTO">
+      INSERT INTO business VALUES(
+      #{idx},
+      #{tel},
+      #{account},
+      #{addr}
+      )
+   </insert>
+	
+	<update id="memberupdate" parameterType="trip.member.model.MemberDTO">
+		UPDATE member SET pwd=#{pwd},question=#{question},answer=#{answer} WHERE id=#{id}
+	</update>
+	<select id="pwdpass" resultType="trip.member.model.MemberDTO" parameterType="trip.member.model.MemberDTO">
+		SELECT * FROM member where id=#{id} and pwd=#{pwd};
+	</select>
+	<update id="userupdatetesttime" parameterType="trip.member.model.UserDTO">
+		UPDATE user SET tel=#{tel},c_idx=#{c_idx} where idx=#{idx}
+	</update>
+	<select id="userselect" parameterType="int" resultType="trip.member.model.UserDTO">
+		SELECT * FROM user WHERE idx=#{idx}
+	</select>
+	<select id="question" resultType="trip.member.model.QuestionDTO">
+		SELECT * FROM question
+	</select>
+	<select id="city" resultType="trip.member.model.CityDTO">
+		select * from city
+	</select>
+	<select id="businessselect" resultType="trip.member.model.BusinessDTO" parameterType="int">
+		select * from business where idx=#{idx}
+	</select>
+	<update id="businessupdatetest" parameterType="trip.member.model.BusinessDTO">
+		update business set tel=#{tel},account=#{account},addr=#{addr} where idx=#{idx}
+	</update>
+	<select id="adminselect" resultType="trip.member.model.AdminDTO" parameterType="int">
+		select * from admin where idx=#{idx}
+	</select>
+	<update id="adminupdatetest" parameterType="trip.member.model.AdminDTO">
+		update admin set account=#{account},ad_price=#{ad_price},pro_price=#{pro_price} where idx=#{idx}
+	</update>
+	<select id="idfind" resultType="String" parameterType="Map">
+		SELECT DISTINCT id FROM member m, user u,business b WHERE m.idx=u.idx AND m.NAME=#{name} AND u.tel=#{tel} OR m.idx=b.idx AND m.NAME=#{name} AND u.tel=#{tel}
+	</select>
+	<update id="newpwd" parameterType="Map">
+		UPDATE member set pwd=#{pwd} where id=#{id}
+	</update>
+	<select id="confirm" parameterType="Map" resultType="int" >
+		SELECT DISTINCT m.idx FROM member m, user u, business b WHERE m.id=#{id} AND m.NAME=#{name} AND m.question=#{question} AND m.answer=#{answer} AND u.tel=#{tel} OR m.id=#{id} AND m.NAME=#{name} AND m.question=#{question} AND m.answer=#{answer} AND b.tel=#{tel} 
+	</select>
+</mapper>
